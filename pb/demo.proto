@@ -267,8 +267,7 @@ service DiscountService {
 }
 
 message DisRequest {
-    // List of important key words from the current page describing the context.
-    string user_id = 1;
+    repeated CartItem items =1;
 }
 
 message DisResponse {
