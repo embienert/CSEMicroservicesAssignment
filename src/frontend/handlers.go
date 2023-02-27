@@ -268,10 +268,14 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	discountProduct, discount, _ := fe.getDiscount(r.Context(), sessionID(r), order.GetOrder().GetItems())
+
 	type cartItemView struct {
-		Item     *pb.Product
-		Quantity int32
-		Price    *pb.Money
+		Item     			*pb.Product
+		Quantity 			int32
+		Price    			*pb.Money
+		Discount 			int32
+		DiscountPrice *pb.Money
 	}
 	items := make([]cartItemView, len(cart))
 	totalPrice := pb.Money{CurrencyCode: currentCurrency(r)}
@@ -288,11 +292,21 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		}
 
 		multPrice := money.MultiplySlow(*price, uint32(item.GetQuantity()))
+
+		itemDiscount := 0
+		if discountProduct == p {
+			itemDiscount := discount
+		}
+		// TODO: Can't use MultiplySlow when second parameter is not integer
+		discountPrice := money.MultiplySlow(*multPrice, uint32(1-itemDiscount))
+
 		items[i] = cartItemView{
 			Item:     p,
 			Quantity: item.GetQuantity(),
-			Price:    &multPrice}
-		totalPrice = money.Must(money.Sum(totalPrice, multPrice))
+			Price:    &multPrice,
+			Discount: uint32(discount*100),
+			DiscountPrice: discountPrice}
+		totalPrice = money.Must(money.Sum(totalPrice, discountPrice))
 	}
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 	year := time.Now().Year()
@@ -361,10 +375,20 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	order.GetOrder().GetItems()
 	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil)
 
+	discountProduct, discount := fe.getDiscount(r.Context(), sessionID(r), order.GetOrder().GetItems())
+
 	totalPaid := *order.GetOrder().GetShippingCost()
 	for _, v := range order.GetOrder().GetItems() {
 		multPrice := money.MultiplySlow(*v.GetCost(), uint32(v.GetItem().GetQuantity()))
-		totalPaid = money.Must(money.Sum(totalPaid, multPrice))
+
+		itemDiscount := 0
+		if v == discountProduct {
+			itemDiscount := discount
+		}
+		// TODO: Can't use MultiplySlow when second parameter is not integer
+		discountPrice = money.MultiplySlow(*multPrice, uint32(1-itemDiscount))
+
+		totalPaid = money.Must(money.Sum(totalPaid, discountPrice))
 	}
 
 	currencies, err := fe.getCurrencies(r.Context())

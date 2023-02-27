@@ -12,16 +12,16 @@ if __name__ == "__main__":
     else:
         port = "8080"
 
-    #set server stub
-    channel = grpc.insecure_channel('localhost:'+port)
+    # set server stub
+    channel = grpc.insecure_channel('localhost:' + port)
     stub = demo_pb2_grpc.DiscountServiceStub(channel)
 
-    #create requests
-    req1S = demo_pb2.UpdateRequest(value = 3)
-    req2S = demo_pb2.UpdateRequest(value = 300)
+    # create requests
+    req1S = demo_pb2.UpdateRequest(value=3)
+    req2S = demo_pb2.UpdateRequest(value=300)
 
-    testitem = demo_pb2.CartItem(product_id = 'testitem_001', quantity = 3)
-    req1D = demo_pb2.DisRequest(items = [testitem])
+    testitem = demo_pb2.CartItem(product_id='testitem_001', quantity=3)
+    req1D = demo_pb2.DisRequest(items=[testitem])
 
     print("Sending Revenue Requests...")
 

@@ -116,6 +116,17 @@ func (fe *frontendServer) getRecommendations(ctx context.Context, userID string,
 	return out, err
 }
 
+func (fe *frontendServer) getDiscount(ctx context.Context, userID string, products []*pb.Product) (*pb.Product, int32, error) {
+	resp, err := pb.NewDiscountServiceClient(fe.discountSvcConn).GetDiscount(&pb.DisRequest{items: products}, ctx)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: Check for matching names in demo.pb.go after update
+	return resp.GetProductIds(), resp.GetValue(), err
+}
+
 func (fe *frontendServer) getAd(ctx context.Context, ctxKeys []string) ([]*pb.Ad, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*100)
 	defer cancel()
