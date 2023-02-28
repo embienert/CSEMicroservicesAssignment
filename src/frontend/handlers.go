@@ -242,6 +242,21 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusFound)
 }
 
+func applyDiscount(m *pb.Money, discount float32) {
+	// Cast money value to float and apply discount
+	price_float := float32(m.GetUnits() + m.getNanos() * 1e-9)
+	discount_price_float = (1-discount) * price_float
+
+	// Cast discounted money value float back to money
+	units := uint32(discount_price_float)
+	nanos := uint32((discount_price_float - units) * 1e9)
+
+	return pb.Money{
+		Units:        units,
+		Nanos:        nanos,
+		CurrencyCode: m.GetCurrencyCode()}
+}
+
 func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("view user cart")
@@ -268,10 +283,29 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	products := make([]pb.Product, len(cart)
+	for i, item := range cart {
+		p, err := fe.getProduct(r.Context(), item.GetProductId())
+		if err != nil {
+			renderHTTPError(log, r, w, errors.Wrapf(err, "could not retrieve product #%s", item.GetProductId()), http.StatusInternalServerError)
+			return
+		}
+
+		products[i] := item
+	}
+
+	discountProduct, discount, err := fe.getDiscount(r.Context(), sessionID(r), &products)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get discount response"), http.StatusInternalServerError)
+		return
+	}
+
 	type cartItemView struct {
-		Item     *pb.Product
-		Quantity int32
-		Price    *pb.Money
+		Item     			*pb.Product
+		Quantity 			int32
+		Price    			*pb.Money
+		Discount 			int32
+		DiscountPrice *pb.Money
 	}
 	items := make([]cartItemView, len(cart))
 	totalPrice := pb.Money{CurrencyCode: currentCurrency(r)}
@@ -288,11 +322,20 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		}
 
 		multPrice := money.MultiplySlow(*price, uint32(item.GetQuantity()))
+
+		itemDiscount := 0
+		if discountProduct == p {
+			itemDiscount := discount
+		}
+		discountPrice := applyDiscount(*multPrice, itemDiscount)
+
 		items[i] = cartItemView{
 			Item:     p,
 			Quantity: item.GetQuantity(),
-			Price:    &multPrice}
-		totalPrice = money.Must(money.Sum(totalPrice, multPrice))
+			Price:    &multPrice,
+			Discount: uint32(discount*100),
+			DiscountPrice: discountPrice}
+		totalPrice = money.Must(money.Sum(totalPrice, discountPrice))
 	}
 	totalPrice = money.Must(money.Sum(totalPrice, *shippingCost))
 	year := time.Now().Year()
@@ -361,10 +404,19 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	order.GetOrder().GetItems()
 	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil)
 
+	discountProduct, discount, err := fe.getDiscount(r.Context(), sessionID(r), order.GetOrder().GetItems())
+
 	totalPaid := *order.GetOrder().GetShippingCost()
 	for _, v := range order.GetOrder().GetItems() {
 		multPrice := money.MultiplySlow(*v.GetCost(), uint32(v.GetItem().GetQuantity()))
-		totalPaid = money.Must(money.Sum(totalPaid, multPrice))
+
+		itemDiscount := 0
+		if v == discountProduct {
+			itemDiscount := discount
+		}
+		discountPrice = applyDiscount(*multPrice, itemDiscount)
+
+		totalPaid = money.Must(money.Sum(totalPaid, discountPrice))
 	}
 
 	currencies, err := fe.getCurrencies(r.Context())
@@ -388,6 +440,8 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"deploymentDetails": deploymentDetailsMap,
 	}); err != nil {
 		log.Println(err)
+	} else {
+		_, _ := fe.updateSales(r.Context(), sessionID(r), &total_paid)
 	}
 }
 

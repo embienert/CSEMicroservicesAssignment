@@ -72,6 +72,9 @@ type frontendServer struct {
 	checkoutSvcAddr string
 	checkoutSvcConn *grpc.ClientConn
 
+	discountSvcAddr string
+	discountSvcConn *grpc.ClientConn
+
 	shippingSvcAddr string
 	shippingSvcConn *grpc.ClientConn
 
@@ -122,6 +125,7 @@ func main() {
 	mustMapEnv(&svc.cartSvcAddr, "CART_SERVICE_ADDR")
 	mustMapEnv(&svc.recommendationSvcAddr, "RECOMMENDATION_SERVICE_ADDR")
 	mustMapEnv(&svc.checkoutSvcAddr, "CHECKOUT_SERVICE_ADDR")
+	mustMapEnv(&svc.discountSvcAddr, "DISCOUNT_SERVICE_ADDR")
 	mustMapEnv(&svc.shippingSvcAddr, "SHIPPING_SERVICE_ADDR")
 	mustMapEnv(&svc.adSvcAddr, "AD_SERVICE_ADDR")
 
@@ -131,6 +135,7 @@ func main() {
 	mustConnGRPC(ctx, &svc.recommendationSvcConn, svc.recommendationSvcAddr)
 	mustConnGRPC(ctx, &svc.shippingSvcConn, svc.shippingSvcAddr)
 	mustConnGRPC(ctx, &svc.checkoutSvcConn, svc.checkoutSvcAddr)
+	mustConnGRPC(ctx, &svc.discountSvcConn, svc.discountSvcAddr)
 	mustConnGRPC(ctx, &svc.adSvcConn, svc.adSvcAddr)
 
 	r := mux.NewRouter()

@@ -14,13 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# [START gke_recommendationservice_genproto]
+# [START gke_discountservice_genproto]
 
-# script to compile python protos
-#
-# requires gRPC tools:
-#   pip install -r requirements.in
 
-python -m grpc_tools.protoc -I../../pb --python_out=. --grpc_python_out=. ../../pb/demo.proto
-
-# [END gke_recommendationservice_genproto]
+#python grpc_tools.protoc -I../../pb --python_out=. --grpc_python_out=. ../../pb/demo.proto
+python C:\Users\abadn\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\grpc_tools\protoc.py -I../../pb --python_out=. --grpc_python_out=. ../../pb/demo.proto
+read -p "press any button"
+# [END gke_discountservice_genproto]
