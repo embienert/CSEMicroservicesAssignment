@@ -127,7 +127,7 @@ if __name__ == "__main__":
         logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.")
 
     port = os.environ.get('PORT', "8080")
-    catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '3550')
+    catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '')
     if catalog_addr == "":
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
     logger.info("product catalog address: " + catalog_addr)
