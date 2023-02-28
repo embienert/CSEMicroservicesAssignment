@@ -129,6 +129,8 @@ if __name__ == "__main__":
     port = os.environ.get('PORT', "8080")
     catalog_addr = os.environ.get('PRODUCT_CATALOG_SERVICE_ADDR', '3035')
     if catalog_addr == "":
+        catalog_addr = "3035"
+    if False:
         raise Exception('PRODUCT_CATALOG_SERVICE_ADDR environment variable not set')
     logger.info("product catalog address: " + catalog_addr)
     channel = grpc.insecure_channel(catalog_addr)
