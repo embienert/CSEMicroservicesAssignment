@@ -12,34 +12,6 @@ from logger import getJSONLogger
 
 logger = getJSONLogger('discount_server')
 
-
-def initStackdriverProfiling():
-    project_id = None
-    try:
-        project_id = os.environ["GCP_PROJECT_ID"]
-    except KeyError:
-        # Environment variable not set
-        pass
-
-    for retry in range(1, 4):
-        try:
-            if project_id:
-                googlecloudprofiler.start(service='discount_server', service_version='1.0.0', verbose=0,
-                                          project_id=project_id)
-            else:
-                googlecloudprofiler.start(service='discount_server', service_version='1.0.0', verbose=0)
-            logger.info("Successfully started Stackdriver Profiler.")
-            return
-        except (BaseException) as exc:
-            logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
-            if (retry < 4):
-                logger.info("Sleeping %d seconds to retry Stackdriver Profiler agent initialization" % (retry * 10))
-                time.sleep(1)
-            else:
-                logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
-    return
-
-
 class Discount(demo_pb2_grpc.DiscountServiceServicer):
 
     # track running revenue in internal variable
