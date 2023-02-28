@@ -283,7 +283,22 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	discountProduct, discount, _ := fe.getDiscount(r.Context(), sessionID(r), order.GetOrder().GetItems())
+	products := make([]pb.Product, len(cart)
+	for i, item := range cart {
+		p, err := fe.getProduct(r.Context(), item.GetProductId())
+		if err != nil {
+			renderHTTPError(log, r, w, errors.Wrapf(err, "could not retrieve product #%s", item.GetProductId()), http.StatusInternalServerError)
+			return
+		}
+
+		products[i] := item
+	}
+
+	discountProduct, discount, err := fe.getDiscount(r.Context(), sessionID(r), &products)
+	if err != nil {
+		renderHTTPError(log, r, w, errors.Wrap(err, "failed to get discount response"), http.StatusInternalServerError)
+		return
+	}
 
 	type cartItemView struct {
 		Item     			*pb.Product
@@ -389,7 +404,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 	order.GetOrder().GetItems()
 	recommendations, _ := fe.getRecommendations(r.Context(), sessionID(r), nil)
 
-	discountProduct, discount := fe.getDiscount(r.Context(), sessionID(r), order.GetOrder().GetItems())
+	discountProduct, discount, err := fe.getDiscount(r.Context(), sessionID(r), order.GetOrder().GetItems())
 
 	totalPaid := *order.GetOrder().GetShippingCost()
 	for _, v := range order.GetOrder().GetItems() {
