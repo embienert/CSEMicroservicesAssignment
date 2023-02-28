@@ -1,0 +1,74 @@
+version: '3'
+services:
+  adservice:
+    container_name: adservice
+    restart: "no"
+    build: ./src/adservice
+  cartservice:
+    container_name: cartservice
+    restart: "no"
+    build: ./src/cartservice/src
+  checkoutservice:
+    environment:
+      - SHIPPING_SERVICE_ADDR=50051
+      - PRODUCT_CATALOG_SERVICE_ADDR=3550
+      - CART_SERVICE_ADDR= 7070
+      - CURRENCY_SERVICE_ADDR=7000
+      - EMAIL_SERVICE_ADDR= 8080
+      - PAYMENT_SERVICE_ADDR=50051
+      - RECOMMENDATION_SERVICE_ADDR=8080
+      - AD_SERVICE_ADDR=9555
+    container_name: checkoutservice
+    restart: "no"
+    build: ./src/checkoutservice
+  currencyservice:
+    environment:
+      - PORT=7000
+      - DISABLE_PROFILER=true
+    container_name: currencyservice
+    restart: "no"
+    build: ./src/currencyservice
+  emailservice:
+    container_name: emailservice
+    restart: "no"
+    build: ./src/emailservice
+  frontendservice:
+    environment:
+      - PRODUCT_CATALOG_SERVICE_ADDR=3550
+      - CURRENCY_SERVICE_ADDR=7000
+      - CART_SERVICE_ADDR= 7070
+      - RECOMMENDATION_SERVICE_ADDR=8080
+      - CHECKOUT_SERVICE_ADDR=5050
+      - SHIPPING_SERVICE_ADDR=50051
+      - AD_SERVICE_ADDR=9555
+      - EMAIL_SERVICE-ADDR=8080
+      - PAYMENT_SERVICE_ADDR=50051
+
+    container_name: frontendservice
+    restart: "no"
+    build: ./src/frontend
+  loadgenerator:
+    container_name: loadgenerator
+    restart: "no"
+    build: ./src/loadgenerator
+  paymentservice:
+    environment:
+      - PORT=50051
+      - DISABLE_PROFILER=true
+    container_name: paymentservice
+    restart: "no"
+    build: ./src/paymentservice
+  productcatalogservice:
+    container_name: productcatalogservice
+    restart: "no"
+    build: ./src/productcatalogservice
+  recommendationservice: 
+    environment:
+      - PRODUCT_CATALOG_SERVICE_ADDR=8080
+    container_name: recommendationservice
+    restart: "no"
+    build: ./src/recommendationservice
+  shippingservice: 
+    container_name: shippingservice
+    restart: "no"
+    build: ./src/shippingservice
