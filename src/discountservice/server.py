@@ -50,6 +50,7 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
         val = request.value
         #if a negative value is passed return negative status response
         if val < 0:
+            logger.info("received negative value")
             return demo_pb2.UpdateResponse(status=False)
         else:
         #update internal revenue tracker and return true status code
@@ -69,7 +70,7 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
         cartSize = len(cartitems)
         #Handle empty cart
         if cartSize <= 0:
-            return demo_pb2.DisResponse(product_id=-1, value=0)
+            return demo_pb2.DisResponse(product_id='-1', value=0)
         #discounts random cart item by 5% if a discount is available
         if self.disAv:
             pid = cartitems[0].product_id
@@ -78,7 +79,7 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
             self.disAv = False
             return demo_pb2.DisResponse(product_id=pid, value=5)
         else:
-            return demo_pb2.DisResponse(product_id=-1, value=0)
+            return demo_pb2.DisResponse(product_id='-1', value=0)
 
 
 def serve():
