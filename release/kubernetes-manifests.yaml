@@ -889,6 +889,9 @@ spec:
           privileged: false
           readOnlyRootFilesystem: true
         image: gcr.io/google-samples/microservices-demo/recommendationservice:v0.5.0
+        env:
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+        value: "productcatalogservice:3550"
         ports:
         - containerPort: 8080
         resources:
