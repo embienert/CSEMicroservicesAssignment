@@ -13,8 +13,12 @@ coverage html
 ```
 The coverage package will create a detailed report to htmlcov\index.html. After navigating to server.py you will see a detailed report, on which lines were executed.
 
+**Updated Architecture Diagram**
 [![New Architecture of
 microservices](./docs/img/architecture-diagram_new.png)](./docs/img/architecture-diagram_new.png)
+
+**Build and Deploy**
+Our changes to the reposetory have not changed the process of building and deploying the example.
 
 ## Original Readme
 **Online Boutique** is a cloud-first microservices demo application.
