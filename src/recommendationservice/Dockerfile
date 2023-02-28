@@ -46,6 +46,7 @@ COPY . .
 
 # set listen port
 ENV PORT "8080"
+ENV PRODUCT_CATALOG_SERVICE_ADDR "3550"
 EXPOSE 8080
 
 ENTRYPOINT ["python", "recommendation_server.py"]
