@@ -37,3 +37,5 @@ if __name__ == "__main__":
     print("Received Discount...")
     print(response.product_id)
     print(response.value)
+
+    response = stub.GetDiscount(demo_pb2.DisRequest(items=[]))

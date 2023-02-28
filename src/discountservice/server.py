@@ -59,6 +59,7 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
             self.disAv = True
             self.revenue = self.revenue - self.disBreakpoint
             logger.info("discount available")
+        self.disAv = True
 
 
 def serve():
