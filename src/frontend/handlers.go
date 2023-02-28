@@ -425,6 +425,8 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		"deploymentDetails": deploymentDetailsMap,
 	}); err != nil {
 		log.Println(err)
+	} else {
+		_, _ := fe.updateSales(r.Context(), sessionID(r), &total_paid)
 	}
 }
 

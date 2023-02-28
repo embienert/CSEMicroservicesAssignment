@@ -1,0 +1,4 @@
+google_cloud_profiler==4.0.0
+grpcio==1.51.3
+protobuf==4.22.0
+python_json_logger==2.0.7

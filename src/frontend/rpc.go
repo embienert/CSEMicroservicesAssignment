@@ -127,6 +127,17 @@ func (fe *frontendServer) getDiscount(ctx context.Context, userID string, produc
 	return resp.GetProductIds(), resp.GetValue(), err
 }
 
+func (fe *frontendServer) updateSales(ctx, context.Context, userID string, revenue *pb.money) {
+	revenue_float := float32(revenue.GetUnits() + revenue.GetNanos() * 1e-9)
+	resp, err := pb.NewDiscountServiceClient(fe.discountSvcConn).UpdateSales(&pb.UpdateRequest{value: revenue_float}, ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, err
+}
+
 func (fe *frontendServer) getAd(ctx context.Context, ctxKeys []string) ([]*pb.Ad, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*100)
 	defer cancel()

@@ -2,6 +2,7 @@ from concurrent import futures
 import os
 import time
 
+import googlecloudprofiler
 import grpc
 import demo_pb2
 import demo_pb2_grpc
@@ -9,6 +10,7 @@ import demo_pb2_grpc
 from logger import getJSONLogger
 
 logger = getJSONLogger('discount_server')
+
 
 def initStackdriverProfiling():
     project_id = None
@@ -39,42 +41,47 @@ def initStackdriverProfiling():
 
 class Discount(demo_pb2_grpc.DiscountServiceServicer):
 
-    #track running revenue in internal variable
+    # track running revenue in internal variable
     def __init__(self, revenue, av, bp):
         self.revenue = revenue
         self.disAv = av
         self.disBreakpoint = bp
 
-    #SalesUpdate rpc communication
+    # SalesUpdate rpc communication
     def UpdateSales(self, request, context):
         val = request.value
-        #if a negative value is passed return negative status response
+        # if a negative value is passed return negative status response
         if val < 0:
             logger.info("received negative value")
             return demo_pb2.UpdateResponse(status=False)
         else:
-        #update internal revenue tracker and return true status code
+            # update internal revenue tracker and return true status code
             self.revenue = self.revenue + val
             logger.info("updated revenue " + str(self.revenue))
             if self.revenue > self.disBreakpoint:
                 self.disAv = True
-                self.revenue = self.revenue-self.disBreakpoint
+                self.revenue = self.revenue - self.disBreakpoint
                 logger.info("discount available")
             return demo_pb2.UpdateResponse(status=True)
 
-    #takes discountrequest als list of cart items
-    #returns p_id of discounted item and discount value
-    #if no discount is given returns p_id -1
+    # takes discountrequest als list of cart items
+    # returns p_id of discounted item and discount value
+    # if no discount is given returns p_id -1
     def GetDiscount(self, request, context):
         cartitems = request.items
         cartSize = len(cartitems)
-        #Handle empty cart
+        # Handle empty cart
         if cartSize <= 0:
+<<<<<<< HEAD
             return demo_pb2.DisResponse(product_id='-1', value=0)
         #discounts random cart item by 5% if a discount is available
+=======
+            return demo_pb2.DisResponse(product_id=-1, value=0)
+        # discounts random cart item by 5% if a discount is available
+>>>>>>> fcdb8506db0b0a38d8a1a34783d92fcca00f8404
         if self.disAv:
             pid = cartitems[0].product_id
-            #print("Discounted " + pid)
+            # print("Discounted " + pid)
             logger.info("discounted product " + pid)
             self.disAv = False
             return demo_pb2.DisResponse(product_id=pid, value=5)
@@ -87,7 +94,7 @@ def serve():
     port = os.environ.get('PORT', "8080")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    service = Discount(revenue = 0, av =False, bp=400)
+    service = Discount(revenue=0, av=False, bp=400)
     demo_pb2_grpc.add_DiscountServiceServicer_to_server(service, server)
 
     server.add_insecure_port('[::]:' + port)
