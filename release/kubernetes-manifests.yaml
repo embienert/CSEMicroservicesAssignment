@@ -866,7 +866,10 @@ spec:
     matchLabels:
       app: discountservice
   replicas: 1
-  template: 
+  template:
+    metadata:
+      labels:
+        app: discountservice 
     spec: 
       containers: 
       - name: discountservice
