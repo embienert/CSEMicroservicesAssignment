@@ -861,7 +861,10 @@ kind: Deployment
 metadata: 
   name: discountservice
   namespace: default
-spec: 
+spec:
+  selector:
+    matchLabels:
+      app: discountservice
   replicas: 1
   template: 
     spec: 
