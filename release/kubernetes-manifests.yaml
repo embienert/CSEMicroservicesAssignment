@@ -887,6 +887,6 @@ spec:
     app: discountservice
   ports:
   - name: discountservice
-    port: 8080
-    targetPort: 8081
+    port: 8000
+    targetPort: 8080
 # [END gke_release_kubernetes_manifests_microservices_demo]
