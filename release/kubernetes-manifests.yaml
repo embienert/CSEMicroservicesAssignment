@@ -855,4 +855,57 @@ spec:
   - name: grpc
     port: 9555
     targetPort: 9555
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discountservice
+spec: 
+  selector:
+    matchLabels:
+      app: discountservice
+  template:
+    metadata:
+      labels:
+        app: discountservice
+    spec:
+      serviceAccountName: default
+        terminationGracePeriodSeconds: 5
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsNonRoot: true
+          runAsUser: 1000
+        containers:
+          - name: discountserver
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - all
+          privileged: false
+          readOnlyRootFilesystem: true
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 200m
+            memory: 180Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discountservice
+spec:
+  type: ClusterIP
+  selector:
+    app: discountservice
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+---
 # [END gke_release_kubernetes_manifests_microservices_demo]
