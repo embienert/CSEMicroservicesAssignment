@@ -858,12 +858,13 @@ spec:
 ---
 apiVersion: apps/v1
 kind: Deployment
-metadata:
+metadata: 
   name: discountservice
 spec:
   selector:
     matchLabels:
       app: discountservice
+  replicas: 1
   template:
     metadata:
       labels:
@@ -898,15 +899,15 @@ spec:
 ---
 apiVersion: v1
 kind: Service
-metadata:
+metadata: 
   name: discountservice
+  namespace: default
 spec:
   type: ClusterIP
-  selector:
+  selector: 
     app: discountservice
   ports:
-  - name: http
-    port: 80
+  - name: discountservice
+    port: 8000
     targetPort: 8080
----
 # [END gke_release_kubernetes_manifests_microservices_demo]
