@@ -242,6 +242,21 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusFound)
 }
 
+func applyDiscount(m *pb.Money, discount float32) {
+	// Cast money value to float and apply discount
+	price_float := float32(m.GetUnits() + m.getNanos() * 1e-9)
+	discount_price_float = (1-discount) * price_float
+
+	// Cast discounted money value float back to money
+	units := uint32(discount_price_float)
+	nanos := uint32((discount_price_float - units) * 1e9)
+
+	return pb.Money{
+		Units:        units,
+		Nanos:        nanos,
+		CurrencyCode: m.GetCurrencyCode()}
+}
+
 func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.Debug("view user cart")
@@ -297,8 +312,7 @@ func (fe *frontendServer) viewCartHandler(w http.ResponseWriter, r *http.Request
 		if discountProduct == p {
 			itemDiscount := discount
 		}
-		// TODO: Can't use MultiplySlow when second parameter is not integer
-		discountPrice := money.MultiplySlow(*multPrice, uint32(1-itemDiscount))
+		discountPrice := applyDiscount(*multPrice, itemDiscount)
 
 		items[i] = cartItemView{
 			Item:     p,
@@ -385,8 +399,7 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
 		if v == discountProduct {
 			itemDiscount := discount
 		}
-		// TODO: Can't use MultiplySlow when second parameter is not integer
-		discountPrice = money.MultiplySlow(*multPrice, uint32(1-itemDiscount))
+		discountPrice = applyDiscount(*multPrice, itemDiscount)
 
 		totalPaid = money.Must(money.Sum(totalPaid, discountPrice))
 	}
