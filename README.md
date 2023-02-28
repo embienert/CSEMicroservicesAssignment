@@ -5,6 +5,15 @@
 
 ![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
 
+## CSE Assignement
+**Coverage Tests** of the discount service are done via coverage.py. After istalling the package, execute the following commands in a command line within the folder with the tests.
+```
+coverage run discountTest.py
+coverage html
+```
+The coverage package will create a detailed report to htmlcov\index.html. After navigating to server.py you will see a detailed report, on which lines were executed.
+
+## Original Readme
 **Online Boutique** is a cloud-first microservices demo application.
 Online Boutique consists of an 11-tier microservices application. The application is a
 web-based e-commerce app where users can browse items,
