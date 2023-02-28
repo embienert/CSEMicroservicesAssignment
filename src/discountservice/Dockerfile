@@ -2,11 +2,11 @@ FROM python:3.8
 
 WORKDIR /app
 
-COPY dependencies.txt dependencies.txt
+COPY requirements.txt requirements.txt
 
 RUN python -m pip install --upgrade pip
 
-RUN pip install -r dependencies.txt
+RUN pip install -r requirements.txt
 
 COPY . .
 
