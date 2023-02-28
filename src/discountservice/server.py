@@ -1,6 +1,7 @@
 from concurrent import futures
 import os
 import time
+import random
 
 import googlecloudprofiler
 import grpc
@@ -46,6 +47,7 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
         self.revenue = revenue
         self.disAv = av
         self.disBreakpoint = bp
+        random.seed()
 
     # SalesUpdate rpc communication
     def UpdateSales(self, request, context):
@@ -72,8 +74,8 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
             return demo_pb2.DisResponse(product_id='-1', value=0)
         #discounts random cart item by 5% if a discount is available
         if self.disAv:
-            pid = cartitems[0].product_id
-            # print("Discounted " + pid)
+            pid = random.choice(cartitems).product_id
+            #print("Discounted " + pid)
             logger.info("discounted product " + pid)
             self.updateAvDiscount();
             return demo_pb2.DisResponse(product_id=pid, value=5)
