@@ -1,6 +1,7 @@
 from concurrent import futures
 import os
 import time
+import random
 
 import googlecloudprofiler
 import grpc
@@ -11,34 +12,6 @@ from logger import getJSONLogger
 
 logger = getJSONLogger('discount_server')
 
-
-def initStackdriverProfiling():
-    project_id = None
-    try:
-        project_id = os.environ["GCP_PROJECT_ID"]
-    except KeyError:
-        # Environment variable not set
-        pass
-
-    for retry in range(1, 4):
-        try:
-            if project_id:
-                googlecloudprofiler.start(service='discount_server', service_version='1.0.0', verbose=0,
-                                          project_id=project_id)
-            else:
-                googlecloudprofiler.start(service='discount_server', service_version='1.0.0', verbose=0)
-            logger.info("Successfully started Stackdriver Profiler.")
-            return
-        except (BaseException) as exc:
-            logger.info("Unable to start Stackdriver Profiler Python agent. " + str(exc))
-            if (retry < 4):
-                logger.info("Sleeping %d seconds to retry Stackdriver Profiler agent initialization" % (retry * 10))
-                time.sleep(1)
-            else:
-                logger.warning("Could not initialize Stackdriver Profiler after retrying, giving up")
-    return
-
-
 class Discount(demo_pb2_grpc.DiscountServiceServicer):
 
     # track running revenue in internal variable
@@ -46,6 +19,7 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
         self.revenue = revenue
         self.disAv = av
         self.disBreakpoint = bp
+        random.seed()
 
     # SalesUpdate rpc communication
     def UpdateSales(self, request, context):
@@ -58,10 +32,7 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
             # update internal revenue tracker and return true status code
             self.revenue = self.revenue + val
             logger.info("updated revenue " + str(self.revenue))
-            if self.revenue > self.disBreakpoint:
-                self.disAv = True
-                self.revenue = self.revenue - self.disBreakpoint
-                logger.info("discount available")
+            self.updateAvDiscount();
             return demo_pb2.UpdateResponse(status=True)
 
     # takes discountrequest als list of cart items
@@ -75,13 +46,20 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
             return demo_pb2.DisResponse(product_id='-1', value=0)
         #discounts random cart item by 5% if a discount is available
         if self.disAv:
-            pid = cartitems[0].product_id
-            # print("Discounted " + pid)
+            pid = random.choice(cartitems).product_id
+            #print("Discounted " + pid)
             logger.info("discounted product " + pid)
-            self.disAv = False
+            self.updateAvDiscount();
             return demo_pb2.DisResponse(product_id=pid, value=5)
         else:
             return demo_pb2.DisResponse(product_id='-1', value=0)
+
+    def updateAvDiscount(self):
+        if self.revenue > self.disBreakpoint:
+            self.disAv = True
+            self.revenue = self.revenue - self.disBreakpoint
+            logger.info("discount available")
+        self.disAv = True
 
 
 def serve():
