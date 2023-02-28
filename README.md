@@ -7,8 +7,10 @@
 
 ## CSE Assignement
 **Coverage Tests** of the discount service are done via coverage.py. After istalling the package, execute the following commands in a command line within the folder with the tests.
->coverage run discountTest.py
->coverage html
+```
+coverage run discountTest.py
+coverage html
+```
 The coverage package will create a detailed report to htmlcov\index.html. After navigating to server.py you will see a detailed report, on which lines were executed.
 
 **Online Boutique** is a cloud-first microservices demo application.
