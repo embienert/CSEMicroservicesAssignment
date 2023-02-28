@@ -877,7 +877,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
       containers:
-        - name: discountserver
+      - name: discountserver
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
