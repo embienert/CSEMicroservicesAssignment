@@ -72,13 +72,8 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
         cartSize = len(cartitems)
         # Handle empty cart
         if cartSize <= 0:
-<<<<<<< HEAD
             return demo_pb2.DisResponse(product_id='-1', value=0)
         #discounts random cart item by 5% if a discount is available
-=======
-            return demo_pb2.DisResponse(product_id=-1, value=0)
-        # discounts random cart item by 5% if a discount is available
->>>>>>> fcdb8506db0b0a38d8a1a34783d92fcca00f8404
         if self.disAv:
             pid = cartitems[0].product_id
             # print("Discounted " + pid)
