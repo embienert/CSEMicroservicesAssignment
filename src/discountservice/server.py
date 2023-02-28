@@ -58,10 +58,7 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
             # update internal revenue tracker and return true status code
             self.revenue = self.revenue + val
             logger.info("updated revenue " + str(self.revenue))
-            if self.revenue > self.disBreakpoint:
-                self.disAv = True
-                self.revenue = self.revenue - self.disBreakpoint
-                logger.info("discount available")
+            self.updateAvDiscount();
             return demo_pb2.UpdateResponse(status=True)
 
     # takes discountrequest als list of cart items
@@ -78,10 +75,16 @@ class Discount(demo_pb2_grpc.DiscountServiceServicer):
             pid = cartitems[0].product_id
             # print("Discounted " + pid)
             logger.info("discounted product " + pid)
-            self.disAv = False
+            self.updateAvDiscount();
             return demo_pb2.DisResponse(product_id=pid, value=5)
         else:
             return demo_pb2.DisResponse(product_id='-1', value=0)
+
+    def updateAvDiscount(self):
+        if self.revenue > self.disBreakpoint:
+            self.disAv = True
+            self.revenue = self.revenue - self.disBreakpoint
+            logger.info("discount available")
 
 
 def serve():
