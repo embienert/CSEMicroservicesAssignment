@@ -39,11 +39,11 @@ services:
       - CART_SERVICE_ADDR= 7070
       - RECOMMENDATION_SERVICE_ADDR=8080
       - CHECKOUT_SERVICE_ADDR=5050
+      - DISCOUNT_SERVICE_ADDR=8080
       - SHIPPING_SERVICE_ADDR=50051
       - AD_SERVICE_ADDR=9555
       - EMAIL_SERVICE-ADDR=8080
       - PAYMENT_SERVICE_ADDR=50051
-
     container_name: frontendservice
     restart: "no"
     build: ./src/frontend
@@ -62,13 +62,13 @@ services:
     container_name: productcatalogservice
     restart: "no"
     build: ./src/productcatalogservice
-  recommendationservice: 
+  recommendationservice:
     environment:
-      - PRODUCT_CATALOG_SERVICE_ADDR=8080
+      - PRODUCT_CATALOG_SERVICE_ADDR=3550
     container_name: recommendationservice
     restart: "no"
     build: ./src/recommendationservice
-  shippingservice: 
+  shippingservice:
     container_name: shippingservice
     restart: "no"
     build: ./src/shippingservice
